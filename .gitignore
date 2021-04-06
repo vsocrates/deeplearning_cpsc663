@@ -133,3 +133,7 @@ dmypy.json
 Assignment_3/data/
 SocratesV_assignment1/data/
 SocratesV_assignment2/data/
+
+
+# ignore all zipped files
+*.zip
