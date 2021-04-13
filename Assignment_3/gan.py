@@ -144,7 +144,13 @@ def train_generator(batch_size):
     generator_optimizer.zero_grad()
     # 1. Create a new batch of fake images (since the discriminator has just been trained on the old ones)
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
-    # ...
+    fake_imgs = generator(noise).to(device)
+    fake_output = discriminator(fake_imgs)
+    loss = -0.5 * torch.mean(torch.log(fake_output))
+
+    loss.backward()
+    generator_optimizer.step()
+
     return loss
 
 def train_discriminator(batch_size, images, labels=None): # labels to be used in 5.4.
@@ -160,6 +166,21 @@ def train_discriminator(batch_size, images, labels=None): # labels to be used in
     Returns the average loss over the batch.
     """
     # TODO: And this function should perform a single training step on the discriminator
+    discriminator_optimizer.zero_grad()
+
+    noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
+    fake_imgs = generator(noise).to(device)
+    images = images.to(device)
+
+    real_output = discriminator(images)
+    fake_output = discriminator(fake_imgs)
+
+    loss = -0.5 * ( torch.mean(torch.log(real_output)) + 
+        torch.mean(torch.log(1-fake_output)) )
+
+    loss.backward()
+    discriminator_optimizer.step()
+
 
     return loss
 
@@ -187,7 +208,7 @@ for epoch in range(training_parameters['n_epochs']):
                 fig, ax = plt.subplots(batch_sqrt, batch_sqrt, figsize=(15, 15))
                 for i, x in enumerate(generated_data):
                     #ax[math.floor(i / batch_sqrt)][i % batch_sqrt].set_title(
-                        label_descriptions[int(fake_labels[i].item())]) # TODO: In 5.4 you can uncomment this line to add labels to images.
+                        # label_descriptions[int(fake_labels[i].item())]) # TODO: In 5.4 you can uncomment this line to add labels to images.
                     ax[math.floor(i / batch_sqrt)][i % batch_sqrt].imshow(x.detach().numpy(), interpolation='nearest',
                                                                           cmap='gray')
                     ax[math.floor(i / batch_sqrt)][i % batch_sqrt].get_xaxis().set_visible(False)
