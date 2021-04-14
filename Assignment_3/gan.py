@@ -82,8 +82,8 @@ class Generator(nn.Module):
     self.label_embedding = nn.Embedding(10, 10)
 
   def forward(self, x, labels=None):
-        if labels:
-            output = torch.cat(self.hidden_layer1(x), self.label_embedding)
+        if labels is not None:
+            output = self.hidden_layer1(torch.cat( (x, self.label_embedding(labels)),1 ))
         else:
             output = self.hidden_layer1(x)
         output = self.hidden_layer2(output)
@@ -122,8 +122,8 @@ class Discriminator(nn.Module):
 
 
     def forward(self, x, labels=None): # labels to be used in 5.4.
-        if labels:
-            output = torch.cat(self.hidden_layer1(x), self.label_embedding)
+        if labels is not None:
+            output = self.hidden_layer1(torch.cat( (x, self.label_embedding(labels)),1 ))
         else:
             output = self.hidden_layer1(x)
 
@@ -159,8 +159,9 @@ def train_generator(batch_size):
     generator_optimizer.zero_grad()
     # 1. Create a new batch of fake images (since the discriminator has just been trained on the old ones)
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
-    fake_imgs = generator(noise, labels).to(device)
     fake_labels = torch.randint(0, 10, (batch_size,)).to(device)
+    
+    fake_imgs = generator(noise, fake_labels).to(device)
     fake_output = discriminator(fake_imgs, fake_labels)
     loss = -0.5 * torch.mean(torch.log(fake_output))
 
@@ -185,8 +186,9 @@ def train_discriminator(batch_size, images, labels=None): # labels to be used in
     discriminator_optimizer.zero_grad()
 
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
-    fake_imgs = generator(noise, labels).to(device)
     fake_labels = torch.randint(0, 10, (batch_size,)).to(device)
+
+    fake_imgs = generator(noise, fake_labels).to(device)
 
     images = images.to(device)
     labels = labels.to(device)
