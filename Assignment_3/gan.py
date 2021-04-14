@@ -19,42 +19,41 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # loading the dataset
 training_parameters = {
-    "img_size": 28,
-    "n_epochs": 24,
-    "batch_size": 64,
-    "learning_rate_generator": 0.0002,
-    "learning_rate_discriminator": 0.0002,
+    "learning_rate_generator": 0.0006,
+    "learning_rate_discriminator":0.0008, 
+    "disc_beta1":0.5,
+    "gen_beta1":0.5,    
 }
 # define a transform to 1) scale the images and 2) convert them into tensors
-transform = transforms.Compose([
-    transforms.Resize(training_parameters['img_size']), # scales the smaller edge of the image to have this size
-    transforms.ToTensor(),
-])
+# transform = transforms.Compose([
+#     transforms.Resize(training_parameters['img_size']), # scales the smaller edge of the image to have this size
+#     transforms.ToTensor(),
+# ])
 
-# load the dataset
-train_loader = torch.utils.data.DataLoader(
-    datasets.FashionMNIST(
-        './data', # specifies the directory to download the datafiles to, relative to the location of the notebook.
-        train = True,
-        download = True,
-        transform = transform),
-    batch_size = training_parameters["batch_size"],
-    shuffle=True
-    )
+# # load the dataset
+# train_loader = torch.utils.data.DataLoader(
+#     datasets.FashionMNIST(
+#         './data', # specifies the directory to download the datafiles to, relative to the location of the notebook.
+#         train = True,
+#         download = True,
+#         transform = transform),
+#     batch_size = training_parameters["batch_size"],
+#     shuffle=True
+#     )
 
-# Fashion MNIST has 10 classes, just like MNIST. Here's what they correspond to:
-label_descriptions = {
-      0: 'T-shirt/top',
-      1: 'Trouser',
-      2: 'Pullover',
-      3: 'Dress',
-      4: 'Coat',
-      5: 'Sandal',
-      6: 'Shirt',
-      7: 'Sneaker',
-      8: 'Bag',
-      9: 'Ankle boot'
-}
+# # Fashion MNIST has 10 classes, just like MNIST. Here's what they correspond to:
+# label_descriptions = {
+#       0: 'T-shirt/top',
+#       1: 'Trouser',
+#       2: 'Pullover',
+#       3: 'Dress',
+#       4: 'Coat',
+#       5: 'Sandal',
+#       6: 'Shirt',
+#       7: 'Sneaker',
+#       8: 'Bag',
+#       9: 'Ankle boot'
+# }
 
 # Create the Generator model class, which will be used to initialize the generator
 class Generator(nn.Module):
@@ -127,8 +126,12 @@ class Discriminator(nn.Module):
 discriminator = Discriminator(784,1).to(device) # initialize both models, and load them to the GPU or CPU.
 generator = Generator(100,784).to(device)
 
-discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=training_parameters['learning_rate_discriminator'])
-generator_optimizer = optim.Adam(generator.parameters(), lr=training_parameters['learning_rate_generator'])
+discriminator_optimizer = optim.Adam(discriminator.parameters(), 
+                                     betas=(training_parameters["disc_beta1"],0.999),
+                                     lr=training_parameters['learning_rate_discriminator'])
+generator_optimizer = optim.Adam(generator.parameters(), 
+                                 betas=(training_parameters["gen_beta1"],0.999),                                 
+                                 lr=training_parameters['learning_rate_generator'])
 
 # TODO: Implement the GAN training procedure.
 # loss =
