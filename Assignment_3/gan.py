@@ -65,7 +65,7 @@ class Generator(nn.Module):
     # 2. Modifying the input to the first hidden layer in the forward class.
     # self.label_embedding = nn.Embedding(10, 10) # This function will be useful.
     self.hidden_layer1 = nn.Sequential(
-        nn.Linear(input_dim, 256),
+        nn.Linear(input_dim + num_labels, 256),
         nn.LeakyReLU(0.2)
     )
     self.hidden_layer2 = nn.Sequential(
@@ -80,14 +80,17 @@ class Generator(nn.Module):
         nn.Linear(1024, output_dim),
         nn.Tanh()
     )
-  def forward(self, x):
-#   def forward(self, x, labels):
-    
-      output = self.hidden_layer1(x)
-      output = self.hidden_layer2(output)
-      output = self.hidden_layer3(output)
-      output = self.hidden_layer4(output)
-      return output.to(device)
+    self.label_embedding = nn.Embedding(10, 10)
+
+  def forward(self, x, labels=None):
+        if labels:
+            output = torch.cat(self.label_embedding, self.hidden_layer1(x))
+        else:
+            output = self.hidden_layer1(x)
+        output = self.hidden_layer2(output)
+        output = self.hidden_layer3(output)
+        output = self.hidden_layer4(output)
+        return output.to(device)
 
 class Discriminator(nn.Module):
     def __init__(self, input_dim, output_dim=1, num_labels=None):
