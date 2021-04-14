@@ -160,7 +160,7 @@ def train_generator(batch_size):
     # 1. Create a new batch of fake images (since the discriminator has just been trained on the old ones)
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
     fake_imgs = generator(noise, labels).to(device)
-    fake_labels = torch.randint(10, batch_size).to(device)
+    fake_labels = torch.randint(0, 10, (batch_size,)).to(device)
     fake_output = discriminator(fake_imgs, fake_labels)
     loss = -0.5 * torch.mean(torch.log(fake_output))
 
@@ -186,7 +186,7 @@ def train_discriminator(batch_size, images, labels=None): # labels to be used in
 
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
     fake_imgs = generator(noise, labels).to(device)
-    fake_labels = torch.randint(10, batch_size).to(device)
+    fake_labels = torch.randint(0, 10, (batch_size,)).to(device)
 
     images = images.to(device)
     labels = labels.to(device)
