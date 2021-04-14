@@ -45,15 +45,15 @@ train_loader = torch.utils.data.DataLoader(
 # Fashion MNIST has 10 classes, just like MNIST. Here's what they correspond to:
 label_descriptions = {
       0: 'T-shirt/top',
-      1	: 'Trouser',
-      2	: 'Pullover',
-      3	: 'Dress',
-      4	: 'Coat',
-      5	: 'Sandal',
-      6	: 'Shirt',
-      7	: 'Sneaker',
-      8	: 'Bag',
-      9	: 'Ankle boot'
+      1: 'Trouser',
+      2: 'Pullover',
+      3: 'Dress',
+      4: 'Coat',
+      5: 'Sandal',
+      6: 'Shirt',
+      7: 'Sneaker',
+      8: 'Bag',
+      9: 'Ankle boot'
 }
 
 # Create the Generator model class, which will be used to initialize the generator
@@ -80,7 +80,9 @@ class Generator(nn.Module):
         nn.Linear(1024, output_dim),
         nn.Tanh()
     )
-  def forward(self, x, labels):
+  def forward(self, x):
+#   def forward(self, x, labels):
+    
       output = self.hidden_layer1(x)
       output = self.hidden_layer2(output)
       output = self.hidden_layer3(output)
@@ -129,7 +131,7 @@ discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=training_par
 generator_optimizer = optim.Adam(generator.parameters(), lr=training_parameters['learning_rate_generator'])
 
 # TODO: Implement the GAN training procedure.
-loss =
+# loss =
 def train_generator(batch_size):
     """
     Performs a training step on the generator by
@@ -171,7 +173,7 @@ def train_discriminator(batch_size, images, labels=None): # labels to be used in
     noise = torch.randn(batch_size,100).to(device) # whenever you create new variables for the model to process, send them to the device, like this.
     fake_imgs = generator(noise).to(device)
     images = images.to(device)
-
+    
     real_output = discriminator(images)
     fake_output = discriminator(fake_imgs)
 
@@ -185,35 +187,3 @@ def train_discriminator(batch_size, images, labels=None): # labels to be used in
     return loss
 
 
-for epoch in range(training_parameters['n_epochs']):
-    G_loss = []  # for plotting the losses over time
-    D_loss = []
-    for batch, (imgs, labels) in enumerate(train_loader):
-        batch_size = labels.shape[0]  # if the batch size doesn't evenly divide the dataset length, this may change on the last epoch.
-        lossG = train_generator(batch_size)
-        G_loss.append(lossG)
-        lossD = train_discriminator(batch_size, imgs, labels)
-        D_loss.append(lossD)
-
-        if ((batch + 1) % 500 == 0 and (epoch + 1) % 1 == 0):
-            # Display a batch of generated images and print the loss
-            print("Training Steps Completed: ", batch)
-            with torch.no_grad():  # disables gradient computation to speed things up
-                noise = torch.randn(batch_size, 100).to(device)
-                fake_labels = torch.randint(0, 10, (batch_size,)).to(device)
-                generated_data = generator(noise, fake_labels).cpu().view(batch_size, 28, 28)
-
-                # display generated images
-                batch_sqrt = int(training_parameters['batch_size'] ** 0.5)
-                fig, ax = plt.subplots(batch_sqrt, batch_sqrt, figsize=(15, 15))
-                for i, x in enumerate(generated_data):
-                    #ax[math.floor(i / batch_sqrt)][i % batch_sqrt].set_title(
-                        # label_descriptions[int(fake_labels[i].item())]) # TODO: In 5.4 you can uncomment this line to add labels to images.
-                    ax[math.floor(i / batch_sqrt)][i % batch_sqrt].imshow(x.detach().numpy(), interpolation='nearest',
-                                                                          cmap='gray')
-                    ax[math.floor(i / batch_sqrt)][i % batch_sqrt].get_xaxis().set_visible(False)
-                    ax[math.floor(i / batch_sqrt)][i % batch_sqrt].get_yaxis().set_visible(False)
-                # plt.show()
-                fig.savefig(f"./results/CGAN_Generations_Epoch_{epoch}")
-                print(
-                    f"Epoch {epoch}: loss_d: {torch.mean(torch.FloatTensor(D_loss))}, loss_g: {torch.mean(torch.FloatTensor(G_loss))}")
