@@ -17,6 +17,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
+parser.add_argument('--learning-rate', type=float, default=1e-3, metavar='LR',
+                    help='learning rate')
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -25,21 +27,21 @@ torch.manual_seed(args.seed)
 device = torch.device("cuda" if args.cuda else "cpu") # Use NVIDIA CUDA GPU if available
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=True, download=True,
-                   transform=transforms.ToTensor()),
-    batch_size=args.batch_size, shuffle=True, **kwargs)
-test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-    batch_size=args.batch_size, shuffle=True, **kwargs)
-# # Uncomment these lines (and comment the above) to use the Fashion MNIST dataset
 # train_loader = torch.utils.data.DataLoader(
-#     datasets.FashionMNIST('./data', train=True, download=True,
+#     datasets.MNIST('./data', train=True, download=True,
 #                    transform=transforms.ToTensor()),
 #     batch_size=args.batch_size, shuffle=True, **kwargs)
 # test_loader = torch.utils.data.DataLoader(
-#     datasets.FashionMNIST('./data', train=False, download=True,transform=transforms.ToTensor()),
+#     datasets.MNIST('./data', train=False, transform=transforms.ToTensor()),
 #     batch_size=args.batch_size, shuffle=True, **kwargs)
+# # Uncomment these lines (and comment the above) to use the Fashion MNIST dataset
+train_loader = torch.utils.data.DataLoader(
+    datasets.FashionMNIST('./data', train=True, download=True,
+                   transform=transforms.ToTensor()),
+    batch_size=args.batch_size, shuffle=True, **kwargs)
+test_loader = torch.utils.data.DataLoader(
+    datasets.FashionMNIST('./data', train=False, download=True,transform=transforms.ToTensor()),
+    batch_size=args.batch_size, shuffle=True, **kwargs)
 
 
 class VAE(nn.Module):
@@ -72,7 +74,7 @@ class VAE(nn.Module):
 
 
 model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
 
 def VAE_loss_function(recon_x, x, mu, logvar):
@@ -97,7 +99,7 @@ def train(epoch):
     model.train()
     train_loss = 0
     for batch_idx, (data, _) in enumerate(train_loader):
-        data = data.to(device)
+        data = data.reshape(-1,784).to(device)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = VAE_loss_function(recon_batch, data, mu, logvar)
@@ -119,12 +121,12 @@ def test(epoch):
     test_loss = 0
     with torch.no_grad():
         for i, (data, _) in enumerate(test_loader):
-            data = data.to(device)
+            data = data.reshape(-1,784).to(device)
             recon_batch, mu, logvar = model(data)
-            test_loss += loss_function(recon_batch, data, mu, logvar).item()
+            test_loss += VAE_loss_function(recon_batch, data, mu, logvar).item()
             if i == 0:
                 n = min(data.size(0), 8)
-                comparison = torch.cat([data[:n],
+                comparison = torch.cat([data.view(args.batch_size, 1, 28, 28)[:n],
                                       recon_batch.view(args.batch_size, 1, 28, 28)[:n]])
                 save_image(comparison.cpu(),
                          'results/reconstruction_' + str(epoch) + '.png', nrow=n)
