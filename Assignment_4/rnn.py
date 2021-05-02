@@ -48,12 +48,22 @@ print('vocab size: {}'.format(VOCABULARY_SIZE))
 #############################################
 # TODO 2: create variable for embedding matrix. Hint: you can use nn.Embedding for this
 #############################################
-
+embedding = nn.Embedding(VOCABULARY_SIZE, EMBEDDING_SIZE)
 
 #############################################
 # TODO 3: define an lstm encoder function that takes the embedding lookup and produces a final state
 # _, final_state = your_lstm_encoder(embedding_lookup_for_x, ...)
 #############################################
+class LSTMEncoder(nn.Module):
+    def __init__(self, embed_dim, hidden_dim):
+        super(LSTMEncoder, self).__init__()
+        self.lstm = nn.LSTM(embed_dim, hidden_dim)
+        self.embed_dim = embed_dim 
+        
+    def forward(self, x):
+        output, (h_n, c_n) = self.lstm(x)
+        return output, (h_n, c_n)
+
 
 
 
@@ -61,23 +71,61 @@ print('vocab size: {}'.format(VOCABULARY_SIZE))
 # TODO 4: define an lstm decoder function that takes the final state from previous step and produces a sequence of outputs
 # outs, _ = your_lstm_decoder(final_state, ...)
 #############################################
+class LSTMDecoder(nn.Module):
+    def __init__(self, embed_dim, hidden_dim, output_size):
+        super(LSTMDecoder, self).__init__()
+        self.lstm = nn.LSTM(embed_dim, hidden_dim)
+        self.out = nn.Linear(hidden_dim, output_size)
+        self.softmax = nn.LogSoftmax(dim=1)
+        self.output_size = output_size 
+        
+    def forward(self, x, hidden, cell):
+        output, hidden = self.lstm(x, (hidden, cell))
+        output = self.softmax(self.out(output[0]))
+        return output, hidden
 
 
+class Seq2Seq(nn.Module):
+    def __init__(self, encoder, decoder, embedding):
+        super(Seq2Seq, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.embedding = embedding
+        
+    def forward(self, x):
+        
+        batch_size = x.shape[1]
+        input_len = x.shape[0]        
+        vocab_size = self.decoder.output_size
+        
+        outputs = torch.zeros(input_len, batch_size, vocab_size)
+        
+        embedded = self.embedding(x)
+        output, (hidden, cell) = self.encoder(embedded)
+        
+        # first input is 0 vector as SOS token 
+        input_val = torch.zeros(1, self.encoder.embed_dim)
+        
+        # we start the decoder at 1, so the first row is all 0s (SOS token)
+        for t in range(1, trg_len):
+            output, hidden, cell = self.decoder(self.embedding(input_val), hidden, cell)            
+            
+            outputs[t] = output
 
-
-
+        return outputs
 
 #############################################
 # TODO: create loss/train ops
 #############################################
 
 # ex.
-# loss_fn = nn.BCELoss()
+encoder = LSTMEncoder(EMBEDDING_SIZE, LSTM_SIZE)
+decoder = LSTMDecoder(embed_dim, hidden_dim, VOCABULARY_SIZE)
+model = Seq2Seq(encoder, decoder, embedding)
+loss_fn = nn.BCELoss()
 # loss = loss_fn(out,one_hots)
-# optimizer = optim.Adam(model.parameters(),lr=0.01)
-
-
-
+optimizer = optim.Adam(model.parameters(),lr=0.01)
+    
 
 # helper function
 def to_one_hot(y_tensor, c_dims):
@@ -105,7 +153,14 @@ for num_iter in range(ITERATIONS):
     #############################################
     #TODO: create loss and update step
     #############################################
-
+    optimizer.zero_grad()
+    
+    outputs = model(batch)
+    print(outputs)
+    loss = loss_fn(out,to_one_hot(outputs))
+    optimizer.step()
+    
+    
     # Hint:following steps will most likely follow the pattern
     # out = model(batch)
     # loss = loss_function(out,batch)
@@ -114,7 +169,7 @@ for num_iter in range(ITERATIONS):
 
     
 # plot word embeddings
-# assuming embeddingscalled "learned_embeddings",
+# assuming embeddings called "learned_embeddings",
 
 fig = plt.figure()
 learned_embeddings_pca = sklearn.decomposition.PCA(2).fit_transform(learned_embeddings)
