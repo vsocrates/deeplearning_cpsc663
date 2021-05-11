@@ -1,0 +1,94 @@
+Starting at Sun May  9 13:04:00 EDT 2021
+Job submitted to the gpu partition, the default partition on farnam
+Job name: vsoc_nodeclass, Job ID: 772991
+  I have 1 CPUs and 50GiB of RAM on compute node p01r03n32.farnam.hpc.yale.internal
+Restoring modules from user's deeplearningmods, for system: "farnam-rhel7"
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda deactivate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+
+Dataset: Cora():
+====================
+Number of graphs: 1
+Number of features: 1433
+Number of classes: 7
+
+Data(edge_index=[2, 10556], test_mask=[2708], train_mask=[2708], val_mask=[2708], x=[2708, 1433], y=[2708])
+=============================================================
+Number of nodes: 2708
+Number of edges: 10556
+Average node degree: 3.90
+Contains isolated nodes: False
+Contains self-loops: False
+Is undirected: True
+Epoch: 010, Loss: 1.6191, Test Accuracy: 0.25
+Epoch: 020, Loss: 1.0930, Test Accuracy: 0.436
+Epoch: 030, Loss: 0.7492, Test Accuracy: 0.467
+Epoch: 040, Loss: 0.4857, Test Accuracy: 0.5
+Epoch: 050, Loss: 0.3668, Test Accuracy: 0.521
+Epoch: 060, Loss: 0.2710, Test Accuracy: 0.57
+Epoch: 070, Loss: 0.2257, Test Accuracy: 0.55
+Epoch: 080, Loss: 0.2002, Test Accuracy: 0.55
+Epoch: 090, Loss: 0.0520, Test Accuracy: 0.544
+Epoch: 100, Loss: 0.0942, Test Accuracy: 0.598
+Epoch: 110, Loss: 0.0920, Test Accuracy: 0.585
+Epoch: 120, Loss: 0.0494, Test Accuracy: 0.584
+Epoch: 130, Loss: 0.1469, Test Accuracy: 0.529
+Epoch: 140, Loss: 0.1756, Test Accuracy: 0.593
+Epoch: 150, Loss: 0.1230, Test Accuracy: 0.561
+Epoch: 160, Loss: 0.0500, Test Accuracy: 0.566
+Epoch: 170, Loss: 0.0412, Test Accuracy: 0.583
+Epoch: 180, Loss: 0.1446, Test Accuracy: 0.565
+Epoch: 190, Loss: 0.0503, Test Accuracy: 0.552
+Epoch: 200, Loss: 0.0884, Test Accuracy: 0.591
+
+Dataset: Cora():
+====================
+Number of graphs: 1
+Number of features: 1433
+Number of classes: 7
+
+Data(edge_index=[2, 10556], test_mask=[2708], train_mask=[2708], val_mask=[2708], x=[2708, 1433], y=[2708])
+=============================================================
+Number of nodes: 2708
+Number of edges: 10556
+Average node degree: 3.90
+Contains isolated nodes: False
+Contains self-loops: False
+Is undirected: True
+Epoch: 010, Loss: 1.9094, Test Accuracy: 0.171
+Epoch: 020, Loss: 1.8222, Test Accuracy: 0.367
+Epoch: 030, Loss: 1.6951, Test Accuracy: 0.549
+Epoch: 040, Loss: 1.5328, Test Accuracy: 0.628
+Epoch: 050, Loss: 1.3046, Test Accuracy: 0.696
+Epoch: 060, Loss: 1.0772, Test Accuracy: 0.746
+Epoch: 070, Loss: 0.8791, Test Accuracy: 0.774
+Epoch: 080, Loss: 0.6857, Test Accuracy: 0.792
+Epoch: 090, Loss: 0.6047, Test Accuracy: 0.799
+Epoch: 100, Loss: 0.5100, Test Accuracy: 0.799
+Epoch: 110, Loss: 0.3793, Test Accuracy: 0.805
+Epoch: 120, Loss: 0.3317, Test Accuracy: 0.81
+Epoch: 130, Loss: 0.2648, Test Accuracy: 0.807
+Epoch: 140, Loss: 0.2324, Test Accuracy: 0.812
+Epoch: 150, Loss: 0.2198, Test Accuracy: 0.808
+Epoch: 160, Loss: 0.2525, Test Accuracy: 0.804
+Epoch: 170, Loss: 0.1777, Test Accuracy: 0.808
+Epoch: 180, Loss: 0.1647, Test Accuracy: 0.811
+Epoch: 190, Loss: 0.1612, Test Accuracy: 0.806
+Epoch: 200, Loss: 0.1514, Test Accuracy: 0.805

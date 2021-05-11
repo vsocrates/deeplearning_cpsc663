@@ -4,7 +4,10 @@ from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.data import DataLoader
 # import the graph classifier you built in the last step
-from GCN import NodeClassifier
+from GCN import NodeClassifier, OGNodeClassifier
+import argparse 
+import sys 
+
 
 # - - - DATA PREPARATIONS - - -
 
@@ -27,11 +30,25 @@ print(f'Contains isolated nodes: {data.contains_isolated_nodes()}')
 print(f'Contains self-loops: {data.contains_self_loops()}')
 print(f'Is undirected: {data.is_undirected()}')
 
+parser = argparse.ArgumentParser(description='Graph Classification.')
+parser.add_argument('model',choices=['kipfwelling', 'xu'],
+                    help='which model to use')
+
+args = parser.parse_args()
+
 # Finally, we've got the train loader and the test loader! Time to start doing the actual training!
 # "A data scientist's job is 90% data, 10% science"
 # - - - TRAINING - - -
 
-model = NodeClassifier(num_node_features=1433, hidden_features=16, num_classes=7)
+if args.model == "xu":
+	model = NodeClassifier(num_node_features=1433, hidden_features=16, num_classes=7)
+elif args.model == "kipfwelling":
+	model = OGNodeClassifier(num_node_features=1433, hidden_features=16, num_classes=7)
+else:
+        print("Inapplicable model name")
+        sys.exit(0)
+
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
 

@@ -4,7 +4,9 @@ from torch_geometric.datasets import TUDataset
 from torch_geometric.data import DataLoader
 from torch_geometric.transforms import Constant
 # import the graph classifier you built in the last step
-from GCN import GraphClassifier, GCNGraphClassifier
+from GCN import GraphClassifier, OGGraphClassifier
+import argparse
+import sys 
 
 # - - - DATA PREPARATIONS - - -
 dataset = TUDataset(
@@ -29,7 +31,13 @@ print(f'Number of edges: {data.num_edges}')
 print(f'Average node degree: {data.num_edges / data.num_nodes:.2f}')
 print(f'Contains isolated nodes: {data.contains_isolated_nodes()}')
 print(f'Contains self-loops: {data.contains_self_loops()}')
-print(f'Is undirected: {data.is_undirected()}')
+print(f'Is undirected: {data.is_undirected()}', flush=True)
+
+parser = argparse.ArgumentParser(description='Graph Classification.')
+parser.add_argument('model',choices=['kipfwelling', 'xu'],
+                    help='which model to use')
+
+args = parser.parse_args()
 
 torch.manual_seed(12345) # for reproducibility
 dataset = dataset.shuffle()
@@ -38,7 +46,7 @@ train_dataset = dataset[:1000]
 test_dataset = dataset[1000:]
 
 print(f'Number of training graphs: {len(train_dataset)}')
-print(f'Number of test graphs: {len(test_dataset)}')
+print(f'Number of test graphs: {len(test_dataset)}', flush=True)
 
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
@@ -47,10 +55,17 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 # "A data scientist's job is 90% data, 10% science"
 # - - - TRAINING - - -
 
-model = GCNGraphClassifier(hidden_channels=64, num_node_features=1, num_classes=2)
+if args.model == "xu":
+	model = GraphClassifier(hidden_channels=64, num_node_features=1, num_classes=2)
+elif args.model == "kipfwelling":
+	model = OGGraphClassifier(hidden_channels=64, num_node_features=1, num_classes=2)
+else:
+	print("Inapplicable model name")
+	sys.exit(0)
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
-
+print("Created Model \n", flush=True)
 def train():
     model.train()
 
@@ -69,10 +84,10 @@ def test(loader):
         pred = out.argmax(dim=1)  # Use the class with highest probability.
         correct += int((pred == data.y).sum())  # Check against ground-truth labels.
     return correct / len(loader.dataset)  # Derive ratio of correct predictions.
-
+print("Starting training \n", flush=True)
 for epoch in range(1, 201):
     train()
     if epoch % 10 == 0:
         train_acc = test(train_loader)
         test_acc = test(test_loader)
-        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}', flush=True)
